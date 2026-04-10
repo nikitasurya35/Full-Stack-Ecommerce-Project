@@ -5,13 +5,18 @@ import com.ecom.productservice.Dto.CategoryStockInfoDto;
 import com.ecom.productservice.Dto.HomePageDto;
 import com.ecom.productservice.Dto.ProductDetailsDto;
 import com.ecom.productservice.Dto.ProductPerCategoryDto;
+import com.ecom.productservice.Mapper.ProductMapper;
+import com.ecom.productservice.model.Product;
 import com.ecom.productservice.projections.CategoryInfo;
 import com.ecom.productservice.projections.ProductCount;
 import com.ecom.productservice.repo.CategoryRepo;
 import com.ecom.productservice.repo.InventoryRepo;
 import com.ecom.productservice.repo.ProductRepo;
+import com.ecom.productservice.specifications.ProductSpecifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -28,33 +33,18 @@ public class ProductQuery {
     private final ProductRepo productRepo;
     private final CategoryRepo categoryRepo;
     private final InventoryRepo inventoryRepo;
+    private final ProductSpecifications productSpecifications;
+    private final ProductMapper productMapper;
 
 
-    public ProductQuery(ProductRepo productRepo, CategoryRepo categoryRepo, InventoryRepo inventoryRepo) {
+    public ProductQuery(ProductRepo productRepo, CategoryRepo categoryRepo, InventoryRepo inventoryRepo, ProductSpecifications productSpecifications, ProductMapper productMapper) {
         this.productRepo = productRepo;
         this.categoryRepo = categoryRepo;
         this.inventoryRepo = inventoryRepo;
+        this.productSpecifications = productSpecifications;
+        this.productMapper = productMapper;
     }
 
-
-
-//    public List<String> ListOfCategories() {
-//        List<String> name =  categoryRepo.findAllProjectedBy()
-//                .stream()
-//                .map(CategoryInfo::getCategoryName)
-//                .collect(Collectors.toList());
-//        //name.forEach(System.out::println);
-//        return name;
-//    }
-
-//    public ProductPerCategoryDto NoOfProductsInCategory(String category_name) {
-//        ProductCount result =  productRepo.findProductCountByCategory(category_name);
-//        int total    = safe(result.getTotalCount());
-//        int inStock  = safe(result.getInStockCount());
-//        int outStock = safe(result.getOutOfStockCount());
-//        ProductPerCategoryDto stockCount = new ProductPerCategoryDto(total, inStock, outStock);
-//        return stockCount;
-//    }
 
     public List<CategoryStockInfoDto> CategoryStockInfo(List<UUID> categoryId) {
 
@@ -73,26 +63,56 @@ public class ProductQuery {
 
 
 
-    public List<ProductDetailsDto> ProductDetails(List<UUID> categoryId, UUID productId) {
+    public List<ProductDetailsDto> getProductDetails(List<UUID> categoryId, UUID productId, Boolean stockStatus) {
+
+        // Build dynamic specification
+        Specification<Product> spec = (root, query, cb) -> cb.conjunction();
+
+        //Filters
+        if (productId != null){
+            spec = spec.and(productSpecifications.hasProductId(productId));
+        }
+        else if (categoryId != null && !categoryId.isEmpty()){
+            spec = spec.and(productSpecifications.hasCategoryId(categoryId));
+        }
+        else if (stockStatus != null){
+            spec = spec.and(productSpecifications.hasStockStatus(stockStatus));
+        }
+        else {
+            List<ProductDetailsDto> result = productRepo.findProductDetails();
+            result.forEach(p -> log.info("{}", p));
+            return result;
+        }
+
+        //Sorting
+
+        //Query
+        List<Product> products = productRepo.findAll(spec);
+
+        //DTO conversion
+        List<ProductDetailsDto> dtoList = products.stream().map(p -> productMapper.toProductDetailDTO(p)).toList();
+        dtoList.forEach(p -> log.info("{}", p));
+        return dtoList;
+
 
         // Case 1: Product ID present
-        if (productId != null) {
-            List<ProductDetailsDto> result = productRepo.findProductDetailsbyId(productId);
-            result.forEach(p -> log.info("{}", p));
-            return result;
-        }
-
-        // Case 2: Category filter
-        if (categoryId != null && !categoryId.isEmpty()) {
-            List<ProductDetailsDto> result = productRepo.findProductDetailsbyCategory(categoryId);
-            result.forEach(p -> log.info("{}", p));
-            return result;
-        }
-
+//        if (productId != null) {
+//            List<ProductDetailsDto> result = productRepo.findProductDetailsbyId(productId);
+//            result.forEach(p -> log.info("{}", p));
+//            return result;
+//        }
+//
+//        // Case 2: Category filter
+//        if (categoryId != null && !categoryId.isEmpty()) {
+//            List<ProductDetailsDto> result = productRepo.findProductDetailsbyCategory(categoryId);
+//            result.forEach(p -> log.info("{}", p));
+//            return result;
+//        }
+//
         // Case 3: Default → all products
-        List<ProductDetailsDto> result = productRepo.findProductDetails();
-        result.forEach(p -> log.info("{}", p));
-        return result;
+//        List<ProductDetailsDto> result = productRepo.findProductDetails();
+//        result.forEach(p -> log.info("{}", p));
+//        return result;
 
 
     }
@@ -100,12 +120,12 @@ public class ProductQuery {
 
 
     //Consolidating for Home Page
-    public HomePageDto getHomeData(List<UUID> categoryId, UUID productId) {
+    public HomePageDto getHomeData(List<UUID> categoryId, UUID productId, Boolean stockStatus) {
 
         // Case 1: Product ID present
         if (productId != null){
             List<CategoryStockInfoDto> categoryStockInfo = null;
-            List<ProductDetailsDto> products = ProductDetails(categoryId, productId);
+            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus);
 
             return HomePageDto.builder()
                     .categoriesStockInfo(categoryStockInfo)
@@ -113,17 +133,31 @@ public class ProductQuery {
                     .build();
         }
 
+        //Case 2: Category Selected
         if(categoryId != null && !categoryId.isEmpty()) {
             List<CategoryStockInfoDto> categoryStockInfo = CategoryStockInfo(categoryId);
-            List<ProductDetailsDto> products = ProductDetails(categoryId, productId);
+            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus);
 
             return HomePageDto.builder()
                     .categoriesStockInfo(categoryStockInfo)
                     .products(products)
                     .build();
         }
+
+        //Case 3: StockStatus is selected
+        if(stockStatus != null){
+            List<CategoryStockInfoDto> categoryStockInfo = null;
+            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus);
+
+            return HomePageDto.builder()
+                    .categoriesStockInfo(categoryStockInfo)
+                    .products(products)
+                    .build();
+        }
+
+        //Case 4: Nothing is selected
         List<CategoryStockInfoDto> categoryStockInfo = CategoryStockInfo(categoryId);
-        List<ProductDetailsDto> products = ProductDetails(categoryId, productId);
+        List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus);
 
         return HomePageDto.builder()
                 .categoriesStockInfo(categoryStockInfo)

@@ -31,7 +31,7 @@ public class Product {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "category_id", nullable = false)
+    @Column(name = "category_id", nullable = false, insertable = false, updatable = false)
     private UUID categoryId;
 
     @Column(name = "product_name", nullable = false)
@@ -74,5 +74,10 @@ public class Product {
 
     @OneToOne(mappedBy = "product") //no column created, just a Java navigation field (mappedby field)
     private Inventory inventory;
+
+    // Direct relationship to Category
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
 }

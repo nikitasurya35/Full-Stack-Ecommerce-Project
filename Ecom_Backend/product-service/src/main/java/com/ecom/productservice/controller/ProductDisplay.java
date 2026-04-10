@@ -30,9 +30,10 @@ public class ProductDisplay {
     @Operation(summary = "Collection of all data to be displayed on home page")
     public ResponseEntity<HomePageDto> getHome(
             @RequestParam(required = false) List<UUID> categoryId,
-            @RequestParam(required = false) UUID productId
+            @RequestParam(required = false) UUID productId,
+            @RequestParam(required = false) Boolean stockStatus
     ) {
-        return ResponseEntity.ok().body(productQuery.getHomeData(categoryId, productId));
+        return ResponseEntity.ok().body(productQuery.getHomeData(categoryId, productId, stockStatus));
     }
 
     @GetMapping("/categories")
@@ -41,23 +42,13 @@ public class ProductDisplay {
         List<CategoryStockInfoDto> stockInfo = productQuery.CategoryStockInfo(categoryId);
         return ResponseEntity.ok().body(stockInfo);
     }
-//    public ResponseEntity<List<String>> getAllCategories() {
-//        List<String> categories = productQuery.ListOfCategories();
-//        return ResponseEntity.ok().body(categories);
-//
-//        //logic for stockcount as well
-//    }
 
-//    @GetMapping("/{$category}")
-//    public ResponseEntity<ProductPerCategoryDto> getStockCount(@PathVariable("$category") String category) {
-//        return ResponseEntity.ok().body(productQuery.NoOfProductsInCategory(category));
-//    }
 
     //GET /products?categoryId=uuid1&categoryId=uuid2
     //?productId=123e4567-e89b-12d3-a456-426614174000
     @GetMapping("/products")
-    public ResponseEntity<List<ProductDetailsDto>> getAllProducts(@RequestParam(required = false) List<UUID> categoryId, @RequestParam(required = false) UUID productId) {
-        return ResponseEntity.ok().body(productQuery.ProductDetails(categoryId, productId));
+    public ResponseEntity<List<ProductDetailsDto>> getAllProducts(@RequestParam(required = false) List<UUID> categoryId, @RequestParam(required = false) UUID productId, @RequestParam(required = false) Boolean stockStatus) {
+        return ResponseEntity.ok().body(productQuery.getProductDetails(categoryId, productId, stockStatus));
     }
 
 }
