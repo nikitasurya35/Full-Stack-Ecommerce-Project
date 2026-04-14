@@ -56,117 +56,117 @@ public interface ProductRepo extends JpaRepository<Product, UUID> , JpaSpecifica
     //ALL Product Details - HomePage - onLoad - 'all Categories -onClick'
     // JPQL does NOT allow AS inside constructor projection
     // JPQL returns wrapper types (Integer, Long) (therefore, DTO projections must have wrapper types instead of primitive types)
-    @Query(""" 
+    @Query("""
     SELECT new com.ecom.productservice.Dto.ProductDetailsDto
         (
         p.id,
         p.productName,
-        c.categoryName, 
+        c.categoryName,
         c.id,
-        p.price, 
-        p.comparePrice, 
-        (i.quantity - i.reservedQuantity), 
-        p.createdAt, 
-        p.status, 
+        p.price,
+        p.comparePrice,
+        (i.quantity - i.reservedQuantity),
+        p.createdAt,
+        p.status,
         p.imageUrl
         )
     FROM Product p
-    JOIN Inventory i on i.product = p 
+    JOIN Inventory i on i.product = p
     JOIN Category c on p.categoryId = c.id
     """)
     List<ProductDetailsDto> findProductDetails();
-
-
-    // Product Details by category selected - onClick
-    @Query(""" 
-    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
-        (
-        p.id,
-        p.productName,
-        c.categoryName, 
-        c.id,
-        p.price, 
-        p.comparePrice, 
-        (i.quantity - i.reservedQuantity), 
-        p.createdAt, 
-        p.status, 
-        p.imageUrl
-        )
-    FROM Product p
-    JOIN Inventory i on i.product = p 
-    JOIN Category c on p.categoryId = c.id
-    WHERE c.id IN :categoryId
-    """)
-    List<ProductDetailsDto> findProductDetailsbyCategory(@Param("categoryId") List<UUID> categoryId);
-
-
-
-    // Product Details by product id - onClick
-    @Query(""" 
-    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
-        (
-        p.id,
-        p.productName,
-        c.categoryName, 
-        c.id,
-        p.price, 
-        p.comparePrice, 
-        (i.quantity - i.reservedQuantity), 
-        p.createdAt, 
-        p.status, 
-        p.imageUrl
-        )
-    FROM Product p
-    JOIN Inventory i on i.product = p 
-    JOIN Category c on p.categoryId = c.id
-    WHERE p.id = :productId
-    """)
-    List<ProductDetailsDto> findProductDetailsbyId(@Param("productId") UUID productId);
-
-
-    //Filter Queries: By Featured
-    @Query(""" 
-    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
-        (
-        p.id,
-        p.productName,
-        c.categoryName, 
-        c.id,
-        p.price, 
-        p.comparePrice, 
-        (i.quantity - i.reservedQuantity), 
-        p.createdAt, 
-        p.status, 
-        p.imageUrl
-        )
-    FROM Product p
-    JOIN Inventory i on i.product = p 
-    JOIN Category c on p.categoryId = c.id
-    WHERE p.isFeatured = true
-    """)
-    List<ProductDetailsDto> findProductDetailsbyFeatureFlag();
-
-
-    //Filter Queries: By Price
-    @Query(""" 
-    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
-        (
-        p.id,
-        p.productName,
-        c.categoryName, 
-        c.id,
-        p.price, 
-        p.comparePrice, 
-        (i.quantity - i.reservedQuantity), 
-        p.createdAt, 
-        p.status, 
-        p.imageUrl
-        )
-    FROM Product p
-    JOIN Inventory i on i.product = p 
-    JOIN Category c on p.categoryId = c.id
-    """)
-    List<ProductDetailsDto> findProductDetailsbyPrice();
+//
+//
+//    // Product Details by category selected - onClick
+//    @Query("""
+//    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
+//        (
+//        p.id,
+//        p.productName,
+//        c.categoryName,
+//        c.id,
+//        p.price,
+//        p.comparePrice,
+//        (i.quantity - i.reservedQuantity),
+//        p.createdAt,
+//        p.status,
+//        p.imageUrl
+//        )
+//    FROM Product p
+//    JOIN Inventory i on i.product = p
+//    JOIN Category c on p.categoryId = c.id
+//    WHERE c.id IN :categoryId
+//    """)
+//    List<ProductDetailsDto> findProductDetailsbyCategory(@Param("categoryId") List<UUID> categoryId);
+//
+//
+//
+//    // Product Details by product id - onClick
+//    @Query("""
+//    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
+//        (
+//        p.id,
+//        p.productName,
+//        c.categoryName,
+//        c.id,
+//        p.price,
+//        p.comparePrice,
+//        (i.quantity - i.reservedQuantity),
+//        p.createdAt,
+//        p.status,
+//        p.imageUrl
+//        )
+//    FROM Product p
+//    JOIN Inventory i on i.product = p
+//    JOIN Category c on p.categoryId = c.id
+//    WHERE p.id = :productId
+//    """)
+//    List<ProductDetailsDto> findProductDetailsbyId(@Param("productId") UUID productId);
+//
+//
+//    //Filter Queries: By Featured
+//    @Query("""
+//    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
+//        (
+//        p.id,
+//        p.productName,
+//        c.categoryName,
+//        c.id,
+//        p.price,
+//        p.comparePrice,
+//        (i.quantity - i.reservedQuantity),
+//        p.createdAt,
+//        p.status,
+//        p.imageUrl
+//        )
+//    FROM Product p
+//    JOIN Inventory i on i.product = p
+//    JOIN Category c on p.categoryId = c.id
+//    WHERE p.isFeatured = true
+//    """)
+//    List<ProductDetailsDto> findProductDetailsbyFeatureFlag();
+//
+//
+//    //Filter Queries: By Price
+//    @Query("""
+//    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
+//        (
+//        p.id,
+//        p.productName,
+//        c.categoryName,
+//        c.id,
+//        p.price,
+//        p.comparePrice,
+//        (i.quantity - i.reservedQuantity),
+//        p.createdAt,
+//        p.status,
+//        p.imageUrl
+//        )
+//    FROM Product p
+//    JOIN Inventory i on i.product = p
+//    JOIN Category c on p.categoryId = c.id
+//    """)
+//    List<ProductDetailsDto> findProductDetailsbyPrice();
 
 
 

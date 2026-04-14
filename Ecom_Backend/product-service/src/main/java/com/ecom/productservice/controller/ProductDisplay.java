@@ -31,9 +31,10 @@ public class ProductDisplay {
     public ResponseEntity<HomePageDto> getHome(
             @RequestParam(required = false) List<UUID> categoryId,
             @RequestParam(required = false) UUID productId,
-            @RequestParam(required = false) Boolean stockStatus
+            @RequestParam(required = false) Boolean stockStatus,
+            @RequestParam(required = false) String sortBy
     ) {
-        return ResponseEntity.ok().body(productQuery.getHomeData(categoryId, productId, stockStatus));
+        return ResponseEntity.ok().body(productQuery.getHomeData(categoryId, productId, stockStatus, sortBy));
     }
 
     @GetMapping("/categories")
@@ -47,8 +48,13 @@ public class ProductDisplay {
     //GET /products?categoryId=uuid1&categoryId=uuid2
     //?productId=123e4567-e89b-12d3-a456-426614174000
     @GetMapping("/products")
-    public ResponseEntity<List<ProductDetailsDto>> getAllProducts(@RequestParam(required = false) List<UUID> categoryId, @RequestParam(required = false) UUID productId, @RequestParam(required = false) Boolean stockStatus) {
-        return ResponseEntity.ok().body(productQuery.getProductDetails(categoryId, productId, stockStatus));
+    public ResponseEntity<List<ProductDetailsDto>> getAllProducts(
+            @RequestParam(required = false) List<UUID> categoryId,
+            @RequestParam(required = false) UUID productId,
+            @RequestParam(required = false) Boolean stockStatus,
+            @RequestParam(required = false) String sortBy
+    ) {
+        return ResponseEntity.ok().body(productQuery.getProductDetails(categoryId, productId, stockStatus, sortBy));
     }
 
 }

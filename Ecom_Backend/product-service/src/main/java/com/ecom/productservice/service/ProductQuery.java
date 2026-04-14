@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -62,36 +63,41 @@ public class ProductQuery {
     }
 
 
-
-    public List<ProductDetailsDto> getProductDetails(List<UUID> categoryId, UUID productId, Boolean stockStatus) {
+    //Uses Spring JPA CriteriaAPI
+    public List<ProductDetailsDto> getProductDetails(
+            List<UUID> categoryId,
+            UUID productId,
+            Boolean stockStatus,
+            String sortBy
+    ) {
 
         // Build dynamic specification
         Specification<Product> spec = (root, query, cb) -> cb.conjunction();
 
         //Filters
+        //Case 1: Product ID present
         if (productId != null){
             spec = spec.and(productSpecifications.hasProductId(productId));
         }
-        else if (categoryId != null && !categoryId.isEmpty()){
+        // Case 2: Category filter
+        if (categoryId != null && !categoryId.isEmpty()){
             spec = spec.and(productSpecifications.hasCategoryId(categoryId));
         }
-        else if (stockStatus != null){
+        // Case 3: Default → all products
+        if (stockStatus != null){
             spec = spec.and(productSpecifications.hasStockStatus(stockStatus));
-        }
-        else {
-            List<ProductDetailsDto> result = productRepo.findProductDetails();
-            result.forEach(p -> log.info("{}", p));
-            return result;
         }
 
         //Sorting
+        Sort sort = buildSort(sortBy);
 
         //Query
-        List<Product> products = productRepo.findAll(spec);
+        List<Product> products = productRepo.findAll(spec, sort);
 
         //DTO conversion
         List<ProductDetailsDto> dtoList = products.stream().map(p -> productMapper.toProductDetailDTO(p)).toList();
         dtoList.forEach(p -> log.info("{}", p));
+
         return dtoList;
 
 
@@ -115,17 +121,24 @@ public class ProductQuery {
 //        return result;
 
 
+//        // Default
+//        else {
+//            List<ProductDetailsDto> result = productRepo.findProductDetails();
+//            result.forEach(p -> log.info("{}", p));
+//            return result;
+//        }
     }
 
 
 
     //Consolidating for Home Page
-    public HomePageDto getHomeData(List<UUID> categoryId, UUID productId, Boolean stockStatus) {
+    public HomePageDto getHomeData(List<UUID> categoryId, UUID productId, Boolean stockStatus, String sortBy)
+    {
 
         // Case 1: Product ID present
         if (productId != null){
             List<CategoryStockInfoDto> categoryStockInfo = null;
-            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus);
+            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
 
             return HomePageDto.builder()
                     .categoriesStockInfo(categoryStockInfo)
@@ -136,7 +149,7 @@ public class ProductQuery {
         //Case 2: Category Selected
         if(categoryId != null && !categoryId.isEmpty()) {
             List<CategoryStockInfoDto> categoryStockInfo = CategoryStockInfo(categoryId);
-            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus);
+            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
 
             return HomePageDto.builder()
                     .categoriesStockInfo(categoryStockInfo)
@@ -147,7 +160,7 @@ public class ProductQuery {
         //Case 3: StockStatus is selected
         if(stockStatus != null){
             List<CategoryStockInfoDto> categoryStockInfo = null;
-            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus);
+            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
 
             return HomePageDto.builder()
                     .categoriesStockInfo(categoryStockInfo)
@@ -157,7 +170,7 @@ public class ProductQuery {
 
         //Case 4: Nothing is selected
         List<CategoryStockInfoDto> categoryStockInfo = CategoryStockInfo(categoryId);
-        List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus);
+        List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
 
         return HomePageDto.builder()
                 .categoriesStockInfo(categoryStockInfo)
@@ -165,7 +178,22 @@ public class ProductQuery {
                 .build();
     }
 
-    private int safe(Long val) {
+
+    static int safe(Long val) {
         return val != null ? val.intValue() : 0;
+    }
+
+    static Sort buildSort(String sortBy) {
+        if(sortBy == null || sortBy.isEmpty()){
+            return Sort.unsorted();
+        }
+        return switch (sortBy.toLowerCase()){
+            case "price_low_to_high" -> Sort.by("price").ascending();
+            case "price_high_to_low" -> Sort.by("price").descending();
+            case "featured" -> Sort.by("featured").ascending();
+            case "new" -> Sort.by("createdAt").ascending();
+            case "old" -> Sort.by("createdAt").descending();
+            default -> Sort.unsorted();
+        };
     }
 }
