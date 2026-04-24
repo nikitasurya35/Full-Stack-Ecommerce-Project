@@ -156,10 +156,10 @@ export default function SideFilter({ onChange }: ProductFiltersProps) {
       <Divider />
 
       {/* Rating (static UI, extend as needed) */}
-      <div>
+      {/* <div>
         <SectionLabel>Min rating</SectionLabel>
         <RatingSelector />
-      </div>
+      </div> */}
 
       {/* Apply CTA */}
       <button
