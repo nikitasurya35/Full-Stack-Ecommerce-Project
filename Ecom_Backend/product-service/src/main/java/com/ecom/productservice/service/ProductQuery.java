@@ -83,7 +83,7 @@ public class ProductQuery {
         if (categoryId != null && !categoryId.isEmpty()){
             spec = spec.and(productSpecifications.hasCategoryId(categoryId));
         }
-        // Case 3: Default → all products
+        // Case 3: Stock status present
         if (stockStatus != null){
             spec = spec.and(productSpecifications.hasStockStatus(stockStatus));
         }
@@ -158,7 +158,7 @@ public class ProductQuery {
         }
 
         //Case 3: StockStatus is selected
-        if(stockStatus != null){
+        if(stockStatus != null || sortBy != null){
             List<CategoryStockInfoDto> categoryStockInfo = null;
             List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
 
@@ -190,7 +190,7 @@ public class ProductQuery {
         return switch (sortBy.toLowerCase()){
             case "price_low_to_high" -> Sort.by("price").ascending();
             case "price_high_to_low" -> Sort.by("price").descending();
-            case "featured" -> Sort.by("featured").ascending();
+            case "featured" -> Sort.by("isFeatured").ascending();
             case "new" -> Sort.by("createdAt").ascending();
             case "old" -> Sort.by("createdAt").descending();
             default -> Sort.unsorted();

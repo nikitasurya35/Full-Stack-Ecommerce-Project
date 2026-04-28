@@ -57,14 +57,14 @@ public class ProductSpecifications {
     }
 
     // For DTO projection
-    public static Specification<Product> withInventoryAndCategory() {
-        return (root, query, cb) -> {
-            // Fetch joins to avoid N+1 queries
-            root.fetch("inventory");
-            root.fetch("category");
-            query.distinct(true); // avoid duplicates
-            return cb.conjunction();
-        };
-    }
+//    public static Specification<Product> withInventoryAndCategory() {
+//        return (root, query, cb) -> {
+//            // Fetch joins to avoid N+1 queries
+//            root.fetch("inventory");
+//            root.fetch("category");
+//            query.distinct(true); // avoid duplicates
+//            return cb.conjunction();
+//        };
+//    }
 
 }

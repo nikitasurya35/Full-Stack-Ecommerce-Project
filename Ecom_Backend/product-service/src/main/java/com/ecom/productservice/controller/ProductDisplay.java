@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/")
-//@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 @Tag(name="Ecom_Backend", description = "APIs for Getting Product Details")
 public class ProductDisplay {
 
@@ -26,7 +26,7 @@ public class ProductDisplay {
 
 
     //FrontEnd will send data like: GET /home?categoryId=abc,def&productId=xyz
-    @GetMapping("/home")
+    @GetMapping("/homeapp")
     @Operation(summary = "Collection of all data to be displayed on home page")
     public ResponseEntity<HomePageDto> getHome(
             @RequestParam(required = false) List<UUID> categoryId,
@@ -48,6 +48,7 @@ public class ProductDisplay {
     //GET /products?categoryId=uuid1&categoryId=uuid2
     //?productId=123e4567-e89b-12d3-a456-426614174000
     @GetMapping("/products")
+    @Operation(summary = "List of Products")
     public ResponseEntity<List<ProductDetailsDto>> getAllProducts(
             @RequestParam(required = false) List<UUID> categoryId,
             @RequestParam(required = false) UUID productId,
