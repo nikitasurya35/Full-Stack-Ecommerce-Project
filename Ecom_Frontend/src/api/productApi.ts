@@ -8,9 +8,11 @@ const API = axios.create({
 export const getProducts = async (params?: {
   categoryId?: string[];
   productId?: number;
-  status?: boolean;
+  stockStatus?: boolean;
   sortBy?: string;
 }): Promise<Product[]> => {
   const response = await API.get("/homeapp", { params });
+  console.log("API params:", params); // Log the API params for debugging
+  console.log("Products Data:", response.data.products); // Log the products data specifically
   return response.data.products;
 };

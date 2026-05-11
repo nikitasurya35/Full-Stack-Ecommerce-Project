@@ -7,8 +7,10 @@ const ProductCard = ({ product }: { product: Product }) => {
 
   const navigate = useNavigate();
   // on the card's onClick:
-  const handleCardClick = () => {
-    navigate(`/product`);
+  const handleCardClick = (product: Product) => {
+    console.log(product);
+    navigate(`/product`, { state: { product } });
+    
   };
 
   return (
@@ -26,7 +28,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       <p className="text-xs text-gray-500 uppercase">
         {product.categoryName}
       </p>
-      <ProductDetails 
+      {/* <ProductDetails 
         onClick={handleCardClick}
         key={product.id}
         product={product}
@@ -34,7 +36,12 @@ const ProductCard = ({ product }: { product: Product }) => {
         <h3 className="font-semibold hover:text-blue-700 hover:underline transition-all duration-200">
           {product.productName}
         </h3>
-      </ProductDetails>
+      </ProductDetails> */}
+      <div key={product.id} onClick={() => handleCardClick(product)} className="cursor-pointer">
+        <h3 className="font-semibold hover:text-blue-700 hover:underline transition-all duration-200">
+          {product.productName}
+        </h3>
+      </div>
 
       <p className="text-yellow-500">Stock {product.availableStock}</p>
       <p className="text-yellow-500"> {product.status}</p>

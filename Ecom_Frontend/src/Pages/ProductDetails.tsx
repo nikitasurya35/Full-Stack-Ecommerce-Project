@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Heart, ShoppingCart, ArrowLeft, Star, Package } from "lucide-react";
-import { getProducts } from "../api/productApi"; // adjust path as needed
-import type { Product } from "../Data/productListSpring"; // adjust path as needed
+// import { getProducts } from "../api/productApi"; // adjust path as needed
+// import type { Product } from "../Data/productListSpring"; // adjust path as needed
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -10,12 +10,15 @@ type Tab = "details" | "specs" | "reviews";
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const ProductDetails = ({product} : {product: Product}) => {
+const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  const { state } = useLocation();
+  const product = state?.product;
+
   //const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<Tab>("details");
   const [wishlist, setWishlist] = useState(false);

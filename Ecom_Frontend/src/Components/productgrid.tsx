@@ -8,7 +8,7 @@ import { getProducts } from "../api/productApi";
 interface FilterState {
   categoryId: string | null; // null = "All"
   //price: { min: string; max: string };
-  status?: boolean | null; // optional, can be added later
+  stockStatus?: boolean | null; // optional, can be added later
 }
 
 const SORT_OPTIONS = [
@@ -23,7 +23,7 @@ const ProductGrid = () => {
   const [filters, setFilters] = useState<FilterState>({
     categoryId: null,
     //price: { min: "", max: "" },
-    status: null,
+    stockStatus: null,
   });
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ const ProductGrid = () => {
       try {
         const prods = await getProducts({
           categoryId: filters.categoryId ? [filters.categoryId] : undefined,
-          status: filters.status ?? undefined,
+          stockStatus: filters.stockStatus ?? undefined,
           //productId: activeProductId ? parseInt(activeProductId) : undefined,
           sortBy: sortBy,
         });
