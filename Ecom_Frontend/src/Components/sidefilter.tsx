@@ -1,10 +1,12 @@
 //"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { CategoryInfo } from "../Data/productListSpring";
+import { getCategorieInfo } from "../api/categoryApi";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Category = "All" | "Audio" | "Peripherals" | "Accessories";
+// type Category = "All" | "Audio" | "Peripherals" | "Accessories";
 
 interface PriceRange {
   min: string;
@@ -12,32 +14,33 @@ interface PriceRange {
 }
 
 interface FilterState {
-  category: Category;
-  price: PriceRange;
+  categoryId: string | null; // null = "All"
+  //price: PriceRange;
+  stockStatus?: boolean | null; // optional, can be added later
 }
 
 interface ProductFiltersProps {
-  /** Called whenever the active filters change */
+  // Called whenever the active filters change
   onChange?: (filters: FilterState) => void;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const CATEGORIES: Category[] = ["All", "Audio", "Peripherals", "Accessories"];
+// const CATEGORIES: Category[] = ["All", "Audio", "Peripherals", "Accessories"];
 
-const CATEGORY_COLORS: Record<Category, string> = {
-  All: "bg-slate-900 text-white",
-  Audio: "bg-violet-600 text-white",
-  Peripherals: "bg-teal-600 text-white",
-  Accessories: "bg-amber-500 text-white",
-};
+// const CATEGORY_COLORS: Record<Category, string> = {
+//   All: "bg-slate-900 text-white",
+//   Audio: "bg-violet-600 text-white",
+//   Peripherals: "bg-teal-600 text-white",
+//   Accessories: "bg-amber-500 text-white",
+// };
 
-const CATEGORY_DOT: Record<Category, string> = {
-  All: "bg-slate-400",
-  Audio: "bg-violet-400",
-  Peripherals: "bg-teal-400",
-  Accessories: "bg-amber-400",
-};
+// const CATEGORY_DOT: Record<Category, string> = {
+//   All: "bg-slate-400",
+//   Audio: "bg-violet-400",
+//   Peripherals: "bg-teal-400",
+//   Accessories: "bg-amber-400",
+// };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -56,27 +59,66 @@ function Divider() {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function SideFilter({ onChange }: ProductFiltersProps) {
-  const [activeCategory, setActiveCategory] = useState<Category>("All"); //default value
+  const [categories, setCategories] = useState<CategoryInfo[]>([]);
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [price, setPrice] = useState<PriceRange>({ min: "", max: "" }); //default value
+  const [stockStatus, setStockStatus] = useState<boolean | null>(null); //default value
 
-  function handleCategoryChange(cat: Category) {
-    setActiveCategory(cat);
-    onChange?.({ category: cat, price });
+  useEffect(() => {
+    getCategorieInfo()
+      .then(setCategories)
+      .catch((error) => console.error("Error in fecthing the categories: ", error));
+
+    // ****this is old way of doing Promise(async and await) calls***
+    // async function fetchCategories() {
+    //   try {
+    //     const data = await getCategorieInfo();
+    //     setCategories(data);
+    //   } catch (error){
+    //     console.error("Error in fecthing the categories: ", error);
+    //   }
+    // } 
+  }, []); //fetch categories from backend and setCategories; []=> run once on mount
+
+  function handleCategoryChange(catId: string | null) {
+    setActiveCategoryId(catId);
+    onChange?.({ categoryId: catId, /*price,*/ stockStatus });
   }
 
-  function handlePriceChange(field: keyof PriceRange, value: string) {
-    const updated = { ...price, [field]: value };
-    setPrice(updated);
-    onChange?.({ category: activeCategory, price: updated });
+  function handleStockStatusChange(status: boolean | null) {
+    const updatedStatus = stockStatus === status ? null : status; // toggle logic
+    setStockStatus(updatedStatus);
+    onChange?.({ categoryId: activeCategoryId, /*price,*/ stockStatus: updatedStatus });
   }
+
+  // function handlePriceChange(field: keyof PriceRange, value: string) { //keyof PriceRange  // = "min" | "max"
+  //   const updated = { ...price, [field]: value };
+  //   setPrice(updated);
+  //   onChange?.({ categoryId: activeCategoryId, price: updated, stockStatus: stockStatus }); // pass the updated
+  // }
 
   function handleClear() {
-    setActiveCategory("All");
+    setActiveCategoryId(null);
     setPrice({ min: "", max: "" });
-    onChange?.({ category: "All", price: { min: "", max: "" } });
+    setStockStatus(null);
+    onChange?.({ categoryId: null, /*price: { min: "", max: "" },*/ stockStatus: null }); 
+    // Here, we are not passing the useState variables as those get updated asynchronously, so they might have old values when onChange is called. Instead, we directly pass the cleared values.
   }
 
-  const hasActiveFilters = activeCategory !== "All" || price.min !== "" || price.max !== "";
+  // if ANY of these is true → hasActiveFilters = true → show "Clear all"
+  const hasActiveFilters = activeCategoryId !== null || price.min !== "" || price.max !== "" || stockStatus !== null;
+
+
+  //It prepends the hardcoded "All" option to the dynamic list from the API, so you get one unified array to .map() over
+  const totalCount = categories.reduce((sum, cat) => sum + cat.totalCount, 0);
+  const inStockCount = categories.reduce((sum, cat) => sum + cat.inStockCount, 0);
+  const outOfStockCount = categories.reduce((sum, cat) => sum + cat.outOfStockCount, 0);
+  
+  const allCategories: CategoryInfo[] = [
+    { categoryId: null, categoryName: "All", totalCount: totalCount, inStockCount: inStockCount, outOfStockCount: outOfStockCount }, ...categories
+  ];
+
+
 
   return (
     <aside className="w-full   p-5 shadow-sm select-none">
@@ -99,35 +141,40 @@ export default function SideFilter({ onChange }: ProductFiltersProps) {
       <div>
         <SectionLabel>Category</SectionLabel>
         <ul className="space-y-1">
-          {CATEGORIES.map((cat) => {
-            const isActive = activeCategory === cat;
+          {allCategories.map((cat) => {
+            const isActive = activeCategoryId === cat.categoryId;
             return (
-              <li key={cat}>
+              //Nullish Coalescing=> ??
+              // if cat.categoryId is null or undefined → use "all"
+              // otherwise → use cat.categoryId
+              <li key={cat.categoryId ?? "All"}> 
                 <button
-                  onClick={() => handleCategoryChange(cat)}
+                  onClick={() => handleCategoryChange(cat.categoryId)}
                   className={`
                     w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium
                     transition-all duration-150 text-left
                     ${
                       isActive
-                        ? `${CATEGORY_COLORS[cat]} shadow-sm`
+                        ? "bg-slate-900 text-white shadow-sm"
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     }
                   `}
-                >
-                  <span
-                    className={`
-                      w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors
-                      ${isActive ? "bg-white opacity-70" : CATEGORY_DOT[cat]}
-                    `}
-                  />
-                  {cat}
-                  {isActive && (
-                    <span className="ml-auto">
-                      <CheckIcon />
-                    </span>
-                  )}
+                > 
+                
+                <span className="flex-1">{cat.categoryName}</span>
+
+                {"totalCount" in cat && (  // 👈 only show badge for real categories, not "All"
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                    isActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                  }`}>
+                    {cat.totalCount}
+                  </span>
+                )}
+                
+                {isActive && <CheckIcon />}
+                
                 </button>
+              
               </li>
             );
           })}
@@ -136,8 +183,68 @@ export default function SideFilter({ onChange }: ProductFiltersProps) {
 
       <Divider />
 
-      {/* Price Range */}
+      {/* Stock Status */}
       <div>
+        <SectionLabel>Stock Status</SectionLabel>
+        <ul className="space-y-1">
+          <li> 
+            <button
+            onClick={() => handleStockStatusChange(true)}
+            className={`
+                    w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium
+                    transition-all duration-150 text-left
+                    ${
+                      stockStatus === true
+                        ? "bg-slate-900 text-white shadow-sm"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    }
+                  `}
+            >
+              <span className="w-2 h-2 rounded-full flex-shrink-0 bg-emerald-400" />
+              <span className="flex-1">In stock</span>
+              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                stockStatus === true ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+              }`}>
+                {inStockCount}
+              </span>
+              {stockStatus === true && <CheckIcon />}
+            </button>
+          </li>
+
+          <li> 
+            <button
+            onClick={() => handleStockStatusChange(false)}
+            className={`
+                    w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium
+                    transition-all duration-150 text-left
+                    ${
+                      stockStatus === false
+                        ? "bg-slate-900 text-white shadow-sm"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    }
+                  `}
+            >
+              <span className="w-2 h-2 rounded-full flex-shrink-0 bg-emerald-400" />
+              <span className="flex-1">Out of stock</span>
+              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full 
+              ${
+                stockStatus === false 
+                ? "bg-white/20 text-white" 
+                : "bg-slate-100 text-slate-500"
+              }`}
+              >
+                {outOfStockCount}
+              </span>
+              {stockStatus === false && <CheckIcon />}
+            </button>
+          </li>
+
+        </ul>
+      </div>
+
+
+      {/* Price Range */}
+      {/* <div>
         <SectionLabel>Price range</SectionLabel>
         <div className="space-y-2">
           <PriceInput
@@ -151,25 +258,14 @@ export default function SideFilter({ onChange }: ProductFiltersProps) {
             onChange={(v) => handlePriceChange("max", v)}
           />
         </div>
-      </div>
+      </div> */}
 
       <Divider />
 
-      {/* Rating (static UI, extend as needed) */}
-      {/* <div>
-        <SectionLabel>Min rating</SectionLabel>
-        <RatingSelector />
-      </div> */}
-
-      {/* Apply CTA */}
+      {/* Apply */}
       <button
-        className="
-          mt-5 w-full py-2.5 rounded-xl text-sm font-semibold
-          bg-slate-900 text-white hover:bg-slate-700
-          active:scale-[0.98] transition-all duration-150
-          shadow-sm
-        "
-        onClick={() => onChange?.({ category: activeCategory, price })}
+        className="mt-5 w-full py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-700 active:scale-[0.98] transition-all duration-150 shadow-sm"
+        onClick={() => onChange?.({ categoryId: activeCategoryId, /*price,*/ stockStatus })} // pass the current state when Apply is clicked 
       >
         Apply filters
       </button>

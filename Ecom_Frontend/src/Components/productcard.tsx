@@ -1,6 +1,16 @@
-import type { Product } from "../Data/ListOfProducts";
+import type { Product } from "../Data/productListSpring";
+import { useNavigate } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
+import ProductDetails from "../Pages/ProductDetails";
 
 const ProductCard = ({ product }: { product: Product }) => {
+
+  const navigate = useNavigate();
+  // on the card's onClick:
+  const handleCardClick = () => {
+    navigate(`/product`);
+  };
+
   return (
     <div className="bg-gray-100 rounded-xl p-4 relative">
       {product.tag && (
@@ -14,18 +24,29 @@ const ProductCard = ({ product }: { product: Product }) => {
       </div>
 
       <p className="text-xs text-gray-500 uppercase">
-        {product.category}
+        {product.categoryName}
       </p>
+      <ProductDetails 
+        onClick={handleCardClick}
+        key={product.id}
+        product={product}
+      >
+        <h3 className="font-semibold hover:text-blue-700 hover:underline transition-all duration-200">
+          {product.productName}
+        </h3>
+      </ProductDetails>
 
-      <h3 className="font-semibold">{product.name}</h3>
-
-      <p className="text-yellow-500">⭐ {product.rating}</p>
+      <p className="text-yellow-500">Stock {product.availableStock}</p>
+      <p className="text-yellow-500"> {product.status}</p>
 
       <div className="flex justify-between items-center mt-2">
         <p className="font-bold">₹{product.price}</p>
 
-        <button className="bg-black text-white p-2 rounded">
+        {/* <button className="bg-black text-white p-2 rounded">
           🛒
+        </button> */}
+        <button className=" p-2 bg-blue-700 rounded-full border border-gray-200 hover:bg-blue-500 shadow-sm">
+          <ShoppingCart className="w-3 h-3 text-white" />
         </button>
       </div>
     </div>

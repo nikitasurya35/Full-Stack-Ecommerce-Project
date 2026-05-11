@@ -1,11 +1,55 @@
 import ProductCard from "./productcard";
-import { products } from "../Data/ListOfProducts";
+import type { Product } from "../Data/productListSpring";
 import { SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SideFilter from "./sidefilter";
+import { getProducts } from "../api/productApi";
+
+interface FilterState {
+  categoryId: string | null; // null = "All"
+  //price: { min: string; max: string };
+  status?: boolean | null; // optional, can be added later
+}
+
+const SORT_OPTIONS = [
+  { label: "Featured",          value: "featured" },
+  { label: "Price Low → High",  value: "price_low_to_high" },
+  { label: "Price High → Low",  value: "price_high_to_low" },
+  { label: "Newest Arrivals",   value: "new" },
+];
 
 const ProductGrid = () => {
   const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    categoryId: null,
+    //price: { min: "", max: "" },
+    status: null,
+  });
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState("featured");
+  //const [activeProductId, setActiveProductId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchProducts(filters: FilterState, sortBy: string) {
+      setLoading(true);
+      try {
+        const prods = await getProducts({
+          categoryId: filters.categoryId ? [filters.categoryId] : undefined,
+          status: filters.status ?? undefined,
+          //productId: activeProductId ? parseInt(activeProductId) : undefined,
+          sortBy: sortBy,
+        });
+        setProducts(prods);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts(filters, sortBy);
+  }, [filters, sortBy]);
 
   return (
     <div className="w-full px-8 py-6">
@@ -24,24 +68,47 @@ const ProductGrid = () => {
           </button>
 
           <p className="text-gray-700 text-sm">
-            {products.length} products
+            {/* {products.length} products */}
+            {loading ? "Loading..." : `${products.length} products`}
           </p>
         </div>
 
         {/* RIGHT: Sort */}
-        <select className="border border-gray-300 px-4 py-2 rounded-lg text-sm">
+        {/* <select className="border border-gray-300 px-4 py-2 rounded-lg text-sm">
           <option>Featured</option>
           <option>Price Low → High</option>
           <option>Price High → Low</option>
+        </select> */}
+        <select
+          className="border border-gray-300 px-4 py-2 rounded-lg text-sm"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
         </select>
       </div>
 
       {/* GRID */}
-      <div className="grid grid-cols-3 gap-6">
+      {loading ? (
+        <div className="text-center text-gray-400 py-20 text-sm">Loading products...</div>
+      ) : products.length === 0 ? (
+        <div className="text-center text-gray-400 py-20 text-sm">No products found.</div>
+      ) : (
+        <div className="grid grid-cols-3 gap-6">
+          {products.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+      )}
+      {/* <div className="grid grid-cols-3 gap-6">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
-      </div>
+      </div> */}
 
       {showFilters && (
         <div className="fixed inset-0 z-50 flex justify-end">
@@ -54,7 +121,10 @@ const ProductGrid = () => {
 
           {/* SIDEBAR */}
           <div className="relative bg-white shadow-lg overflow-y-auto">
-            <SideFilter onChange={(filters) => console.log(filters)} />
+            <SideFilter onChange={(filters) => {
+              setFilters(filters);
+              console.log(filters);
+            }} />
           </div>
 
         </div>
