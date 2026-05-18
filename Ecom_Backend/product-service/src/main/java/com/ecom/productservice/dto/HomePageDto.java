@@ -1,15 +1,13 @@
-package com.ecom.productservice.Dto;
+package com.ecom.productservice.dto;
 
 import lombok.*;
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-@Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class HomePageDto {
     private List<CategoryStockInfoDto> categoriesStockInfo;
     private List<ProductDetailsDto> products;

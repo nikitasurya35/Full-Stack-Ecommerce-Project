@@ -1,7 +1,7 @@
 package com.ecom.productservice.repo;
 
-import com.ecom.productservice.Dto.CategoryStockInfoDto;
-import com.ecom.productservice.Dto.ProductDetailsDto;
+import com.ecom.productservice.dto.CategoryStockInfoDto;
+import com.ecom.productservice.dto.ProductDetailsDto;
 import com.ecom.productservice.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -18,7 +18,7 @@ public interface ProductRepo extends JpaRepository<Product, UUID> , JpaSpecifica
 
     //Category Stock Information //To be shown HomePage - onLoad
     @Query("""
-    SELECT new com.ecom.productservice.Dto.CategoryStockInfoDto(
+    SELECT new com.ecom.productservice.dto.CategoryStockInfoDto(
         c.categoryName,
         c.id,
         COUNT(p.id),
@@ -36,7 +36,7 @@ public interface ProductRepo extends JpaRepository<Product, UUID> , JpaSpecifica
 
     //Category Stock Information by selected Categories - onClick
     @Query("""
-    SELECT new com.ecom.productservice.Dto.CategoryStockInfoDto(
+    SELECT new com.ecom.productservice.dto.CategoryStockInfoDto(
         c.categoryName,
         c.id,
         COUNT(p.id),
@@ -57,7 +57,7 @@ public interface ProductRepo extends JpaRepository<Product, UUID> , JpaSpecifica
     // JPQL does NOT allow AS inside constructor projection
     // JPQL returns wrapper types (Integer, Long) (therefore, DTO projections must have wrapper types instead of primitive types)
     @Query("""
-    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
+    SELECT new com.ecom.productservice.dto.ProductDetailsDto
         (
         p.id,
         p.productName,
@@ -79,7 +79,7 @@ public interface ProductRepo extends JpaRepository<Product, UUID> , JpaSpecifica
 //
 //    // Product Details by category selected - onClick
 //    @Query("""
-//    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
+//    SELECT new com.ecom.productservice.dto.ProductDetailsDto
 //        (
 //        p.id,
 //        p.productName,
@@ -103,7 +103,7 @@ public interface ProductRepo extends JpaRepository<Product, UUID> , JpaSpecifica
 //
 //    // Product Details by product id - onClick
 //    @Query("""
-//    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
+//    SELECT new com.ecom.productservice.dto.ProductDetailsDto
 //        (
 //        p.id,
 //        p.productName,
@@ -126,7 +126,7 @@ public interface ProductRepo extends JpaRepository<Product, UUID> , JpaSpecifica
 //
 //    //Filter Queries: By Featured
 //    @Query("""
-//    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
+//    SELECT new com.ecom.productservice.dto.ProductDetailsDto
 //        (
 //        p.id,
 //        p.productName,
@@ -149,7 +149,7 @@ public interface ProductRepo extends JpaRepository<Product, UUID> , JpaSpecifica
 //
 //    //Filter Queries: By Price
 //    @Query("""
-//    SELECT new com.ecom.productservice.Dto.ProductDetailsDto
+//    SELECT new com.ecom.productservice.dto.ProductDetailsDto
 //        (
 //        p.id,
 //        p.productName,

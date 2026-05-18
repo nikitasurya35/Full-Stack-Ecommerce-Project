@@ -1,15 +1,13 @@
-package com.ecom.productservice.Dto;
+package com.ecom.productservice.dto;
 
 import lombok.*;
 
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CategoryStockInfoDto {
     private String categoryName;
     private UUID categoryId;

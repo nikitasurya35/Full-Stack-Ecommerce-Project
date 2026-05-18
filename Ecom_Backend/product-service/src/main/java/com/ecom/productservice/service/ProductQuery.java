@@ -1,14 +1,11 @@
 //All Read/Query business logic
 package com.ecom.productservice.service;
 
-import com.ecom.productservice.Dto.CategoryStockInfoDto;
-import com.ecom.productservice.Dto.HomePageDto;
-import com.ecom.productservice.Dto.ProductDetailsDto;
-import com.ecom.productservice.Dto.ProductPerCategoryDto;
-import com.ecom.productservice.Mapper.ProductMapper;
+import com.ecom.productservice.dto.CategoryStockInfoDto;
+import com.ecom.productservice.dto.HomePageDto;
+import com.ecom.productservice.dto.ProductDetailsDto;
+import com.ecom.productservice.mapper.ProductMapper;
 import com.ecom.productservice.model.Product;
-import com.ecom.productservice.projections.CategoryInfo;
-import com.ecom.productservice.projections.ProductCount;
 import com.ecom.productservice.repo.CategoryRepo;
 import com.ecom.productservice.repo.InventoryRepo;
 import com.ecom.productservice.repo.ProductRepo;
@@ -21,9 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductQuery {
@@ -100,33 +95,6 @@ public class ProductQuery {
 
         return dtoList;
 
-
-        // Case 1: Product ID present
-//        if (productId != null) {
-//            List<ProductDetailsDto> result = productRepo.findProductDetailsbyId(productId);
-//            result.forEach(p -> log.info("{}", p));
-//            return result;
-//        }
-//
-//        // Case 2: Category filter
-//        if (categoryId != null && !categoryId.isEmpty()) {
-//            List<ProductDetailsDto> result = productRepo.findProductDetailsbyCategory(categoryId);
-//            result.forEach(p -> log.info("{}", p));
-//            return result;
-//        }
-//
-        // Case 3: Default → all products
-//        List<ProductDetailsDto> result = productRepo.findProductDetails();
-//        result.forEach(p -> log.info("{}", p));
-//        return result;
-
-
-//        // Default
-//        else {
-//            List<ProductDetailsDto> result = productRepo.findProductDetails();
-//            result.forEach(p -> log.info("{}", p));
-//            return result;
-//        }
     }
 
 

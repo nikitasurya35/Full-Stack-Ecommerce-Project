@@ -1,9 +1,8 @@
 package com.ecom.productservice.controller;
 
-import com.ecom.productservice.Dto.CategoryStockInfoDto;
-import com.ecom.productservice.Dto.HomePageDto;
-import com.ecom.productservice.Dto.ProductDetailsDto;
-import com.ecom.productservice.Dto.ProductPerCategoryDto;
+import com.ecom.productservice.dto.CategoryStockInfoDto;
+import com.ecom.productservice.dto.HomePageDto;
+import com.ecom.productservice.dto.ProductDetailsDto;
 import com.ecom.productservice.service.ProductQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

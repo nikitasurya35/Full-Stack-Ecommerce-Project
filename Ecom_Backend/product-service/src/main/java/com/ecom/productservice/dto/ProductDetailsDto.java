@@ -1,19 +1,16 @@
-package com.ecom.productservice.Dto;
+package com.ecom.productservice.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-@Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class ProductDetailsDto {
     private UUID id;
 

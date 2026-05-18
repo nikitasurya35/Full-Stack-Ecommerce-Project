@@ -1,15 +1,12 @@
 //Used for counting number of items per category by their availabilty
-package com.ecom.productservice.Dto;
+package com.ecom.productservice.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@Builder
 public class ProductPerCategoryDto {
     private int totalCount;
     private int inStockCount;
