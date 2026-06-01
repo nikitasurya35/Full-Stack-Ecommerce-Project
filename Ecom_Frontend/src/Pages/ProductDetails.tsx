@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Heart, ShoppingCart, ArrowLeft, Star, Package } from "lucide-react";
-// import { getProducts } from "../api/productApi"; // adjust path as needed
-// import type { Product } from "../Data/productListSpring"; // adjust path as needed
+import { useParams, useNavigate } from "react-router-dom";
+import { Heart, ShoppingCart, ArrowLeft, Star } from "lucide-react";
+import type { Product } from "../Data/productListSpring";
+import { getProducts } from "../api/productApi"; // adjust path as needed
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -11,27 +12,35 @@ type Tab = "details" | "specs" | "reviews";
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const ProductDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const {slug}  = useParams<{ slug: string }>(); // useParams to get the slug from the URL; useParams returns an object of key-value pairs of the dynamic params in the URL, so we destructure it to get 'slug'
   const navigate = useNavigate();
 
-  const { state } = useLocation();
-  const product = state?.product;
+  const productId: string = slug?.split("__").pop() || "0"; 
+  console.log("Extracted productId:", productId); // Log the extracted productId for debugging
+  // Get the last part after the last hyphen [pop() gets the last element of the array; 
+  // pop can return undefined so we need "0"]
 
-  //const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState();
+  const [loading, setLoading] = useState<Boolean>(false);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<Tab>("details");
   const [wishlist, setWishlist] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [product, setProduct] = useState<Product | null>(null);
+  
 
-  // useEffect(() => {
-  //   if (!id) return;
-  //   setLoading(true);
-  //   getProductById(id)
-  //     .then(setProduct)
-  //     .catch((err) => console.error("Failed to fetch product:", err))
-  //     .finally(() => setLoading(false));
-  // }, [id]);
+ useEffect(() => {
+    if (!productId) return;
+
+    setLoading(true);
+
+    getProducts({ productId })
+      .then((products) => setProduct(products[0] || null))
+      .catch((err) => console.error("Failed to fetch product:", err))
+      .finally(() => setLoading(false));
+
+  }, [productId]);
+
+  const isOutOfStock = product?.status !== "ACTIVE";
 
   const handleAddToCart = () => {
     setAddedToCart(true);
@@ -65,6 +74,7 @@ const ProductDetails = () => {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
+    
     <div className="max-w-5xl mx-auto px-8 py-8">
 
       {/* Breadcrumb */}
@@ -83,7 +93,7 @@ const ProductDetails = () => {
         <div>
           <div className="relative bg-gray-100 rounded-2xl h-96 flex items-center justify-center">
             {/* Badge */}
-            {product.status === "Out of Stock" && (
+            {product.status !== "ACTIVE" && (
               <span className="absolute top-4 left-4 text-[11px] font-semibold bg-red-100 text-red-600 px-2.5 py-1 rounded-full">
                 Out of stock
               </span>
@@ -170,9 +180,18 @@ const ProductDetails = () => {
 
           {/* Quantity */}
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-slate-700">Qty</span>
-            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+            {/* <span className={`text-sm font-medium ${isOutOfStock ? 
+                 "text-slate-500 opacity-60" 
+                :  "text-slate-700"
+              }`}>Qty</span> */}
+            {/* <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden"> */}
+            <div className = {`flex items-center border rounded-lg overflow-hidden
+              ${isOutOfStock ? 
+                "border-gray-200 bg-gray-50 opacity-40 cursor-not-allowed" 
+                : "border-gray-400"
+              }`}>
               <button
+                disabled={isOutOfStock}
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 className="w-9 h-9 flex items-center justify-center text-lg text-gray-600 hover:bg-gray-50 transition"
               >
@@ -180,6 +199,7 @@ const ProductDetails = () => {
               </button>
               <span className="w-9 text-center text-sm font-semibold">{quantity}</span>
               <button
+                disabled={isOutOfStock}
                 onClick={() => setQuantity((q) => q + 1)}
                 className="w-9 h-9 flex items-center justify-center text-lg text-gray-600 hover:bg-gray-50 transition"
               >
@@ -188,10 +208,10 @@ const ProductDetails = () => {
             </div>
             <span
               className={`text-xs font-medium ${
-                product.status !== "Out of Stock" ? "text-emerald-600" : "text-red-500"
+                product.status === "ACTIVE" ? "text-emerald-600" : "text-red-500"
               }`}
             >
-              {product.status !== "Out of Stock" ? "✓ In Stock" : "Out of stock"}
+              {product.status === "ACTIVE" ? "✓ In Stock" : "Out of stock"}
             </span>
           </div>
 
@@ -199,21 +219,21 @@ const ProductDetails = () => {
           <div className="flex gap-3">
             <button
               onClick={handleAddToCart}
-              disabled={product.status === "Out of Stock"}
+              disabled={isOutOfStock}
               className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition
                 ${
                   addedToCart
                     ? "bg-emerald-600 text-white"
                     : "bg-slate-900 text-white hover:bg-slate-700 active:scale-[0.98]"
                 }
-                disabled:opacity-40 disabled:cursor-not-allowed`}
+                disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               <ShoppingCart className="w-4 h-4" />
               {addedToCart ? "Added!" : "Add to Cart"}
             </button>
             <button
-              disabled={product.status === "Out of Stock"}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold bg-violet-600 text-white hover:bg-violet-700 active:scale-[0.98] transition disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={isOutOfStock}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold bg-violet-600 text-white hover:bg-violet-700 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Buy Now
             </button>

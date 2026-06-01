@@ -2,12 +2,13 @@ import axios from "axios";
 import type { Product } from "../Data/productListSpring"; //When importing insterface: always add 'type' before it
 
 const API = axios.create({
-  baseURL: "http://localhost:4000",
+  //baseURL: "http://localhost:4000",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 export const getProducts = async (params?: {
   categoryId?: string[];
-  productId?: number;
+  productId?: string;
   stockStatus?: boolean;
   sortBy?: string;
 }): Promise<Product[]> => {

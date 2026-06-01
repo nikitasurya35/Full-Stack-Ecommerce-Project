@@ -4,6 +4,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import SideFilter from "./sidefilter";
 import { getProducts } from "../api/productApi";
+import { useSearchParams } from "react-router-dom";
 
 interface FilterState {
   categoryId: string | null; // null = "All"
@@ -19,16 +20,30 @@ const SORT_OPTIONS = [
 ];
 
 const ProductGrid = () => {
+  
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    categoryId: null,
-    //price: { min: "", max: "" },
-    stockStatus: null,
-  });
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-  const [sortBy, setSortBy] = useState("featured");
-  //const [activeProductId, setActiveProductId] = useState<string | null>(null);
+  // const [filters, setFilters] = useState<FilterState>({
+  //   categoryId: null,
+  //   //price: { min: "", max: "" },
+  //   stockStatus: null,
+  // });
+  // const [sortBy, setSortBy] = useState("featured");
+  //Changes made to update URL params instead of local state
+  const filters: FilterState = {
+      categoryId: searchParams.get("categoryId"),
+
+      stockStatus:
+        searchParams.get("stockStatus") === null
+          ? null
+          : searchParams.get("stockStatus") === "true", //You are explicitly converting the string "true" from the URL into the boolean true. true ===true becomes boolean true and false === "true" becomes boolean false. This way, you can handle the stockStatus as a boolean in your application while still using URL parameters to represent its state.
+  };
+
+  const sortBy = searchParams.get("sortBy") || "featured";
+
+
 
   useEffect(() => {
     async function fetchProducts(filters: FilterState, sortBy: string) {
@@ -49,7 +64,7 @@ const ProductGrid = () => {
     }
 
     fetchProducts(filters, sortBy);
-  }, [filters, sortBy]);
+  }, [filters.categoryId, filters.stockStatus, sortBy]);
 
   return (
     <div className="w-full px-8 py-6">
@@ -82,7 +97,14 @@ const ProductGrid = () => {
         <select
           className="border border-gray-300 px-4 py-2 rounded-lg text-sm"
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
+          // onChange={(e) => setSortBy(e.target.value)} //Changes made to update URL params instead of local state
+          onChange={(e) => {
+            const params = Object.fromEntries(searchParams.entries());
+
+            params.sortBy = e.target.value;
+
+            setSearchParams(params);
+          }}
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -122,7 +144,28 @@ const ProductGrid = () => {
           {/* SIDEBAR */}
           <div className="relative bg-white shadow-lg overflow-y-auto">
             <SideFilter onChange={(filters) => {
-              setFilters(filters);
+              // setFilters(filters); Changes made to update URL params instead of local state
+              
+              const params: Record<string, string> = {};
+
+              // CATEGORY
+              if (filters.categoryId) {
+                params.categoryId = filters.categoryId;
+              }
+
+              // STOCK STATUS
+              if (
+                filters.stockStatus !== null &&
+                filters.stockStatus !== undefined
+              ) {
+                params.stockStatus = String(filters.stockStatus);
+              }
+
+              // KEEP SORT
+              params.sortBy = sortBy;
+
+              setSearchParams(params);
+  
               console.log(filters);
             }} />
           </div>

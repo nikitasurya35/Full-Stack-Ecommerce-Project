@@ -263,12 +263,7 @@ export default function SideFilter({ onChange }: ProductFiltersProps) {
       <Divider />
 
       {/* Apply */}
-      <button
-        className="mt-5 w-full py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-700 active:scale-[0.98] transition-all duration-150 shadow-sm"
-        onClick={() => onChange?.({ categoryId: activeCategoryId, /*price,*/ stockStatus })} // pass the current state when Apply is clicked 
-      >
-        Apply filters
-      </button>
+      {/* Button to apply features */}
     </aside>
   );
 }

@@ -9,7 +9,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Login/>} />
         <Route path="/home" element={<Home/>} />
-        <Route path="/product" element={<ProductDetails />} />
+        <Route path="/product/:slug" element={<ProductDetails />} /> 
+        {/* :slug is a route parameter that will capture the product slug from the URL */}
       </Routes>
     </BrowserRouter>
   );
