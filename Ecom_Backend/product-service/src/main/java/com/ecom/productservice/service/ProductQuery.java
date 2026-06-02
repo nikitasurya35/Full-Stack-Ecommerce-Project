@@ -4,6 +4,7 @@ package com.ecom.productservice.service;
 import com.ecom.productservice.dto.CategoryStockInfoDto;
 import com.ecom.productservice.dto.HomePageDto;
 import com.ecom.productservice.dto.ProductDetailsDto;
+import com.ecom.productservice.dto.ProductSlugDto;
 import com.ecom.productservice.mapper.ProductMapper;
 import com.ecom.productservice.model.Product;
 import com.ecom.productservice.repo.CategoryRepo;
@@ -163,5 +164,12 @@ public class ProductQuery {
             case "old" -> Sort.by("createdAt").descending();
             default -> Sort.unsorted();
         };
+    }
+
+    public List<ProductSlugDto> getSlugInfo() {
+        return productRepo.findAll()
+                .stream()
+                .map(product -> new ProductSlugDto(product.getId(),product.getSlug()))
+                .toList();
     }
 }

@@ -139,8 +139,7 @@
                 <artifactId>flyway-maven-plugin</artifactId>
 
                 <configuration>
-                    <url>jdbc:postgresql://localhost:5432/e-commerce</url> <!-- flyway will not work mostly due to - in e-commerce db name; running with mvn cmds now
-                    mvn flyway:migrate-->
+                    <url>jdbc:postgresql://localhost:5432/e-commerce</url> <!-- flyway will not work mostly due to - in e-commerce db name; running with mvn cmds now -> mvn flyway:migrate [product-service % mvn flyway:migrate]-->
                     <user>postgres</user>
                     <password>postgres123</password>
                     <baselineOnMigrate>true</baselineOnMigrate>

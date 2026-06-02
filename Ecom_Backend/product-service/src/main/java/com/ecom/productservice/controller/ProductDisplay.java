@@ -3,6 +3,7 @@ package com.ecom.productservice.controller;
 import com.ecom.productservice.dto.CategoryStockInfoDto;
 import com.ecom.productservice.dto.HomePageDto;
 import com.ecom.productservice.dto.ProductDetailsDto;
+import com.ecom.productservice.dto.ProductSlugDto;
 import com.ecom.productservice.service.ProductQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,6 +56,13 @@ public class ProductDisplay {
             @RequestParam(required = false) String sortBy
     ) {
         return ResponseEntity.ok().body(productQuery.getProductDetails(categoryId, productId, stockStatus, sortBy));
+    }
+
+    @GetMapping("/slugs")
+    @Operation(summary = "List of Slugs and respective product ids")
+    public ResponseEntity<List<ProductSlugDto>> getProductSlugs(){
+        List<ProductSlugDto> slugs = productQuery.getSlugInfo();
+        return ResponseEntity.ok().body(slugs);
     }
 
 }
