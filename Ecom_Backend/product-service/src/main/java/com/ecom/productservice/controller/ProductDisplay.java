@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/products")
 @CrossOrigin(origins = "http://localhost:5173")
 @Tag(name="Ecom_Backend", description = "APIs for Getting Product Details")
 public class ProductDisplay {
@@ -58,11 +58,6 @@ public class ProductDisplay {
         return ResponseEntity.ok().body(productQuery.getProductDetails(categoryId, productId, stockStatus, sortBy));
     }
 
-    @GetMapping("/slugs")
-    @Operation(summary = "List of Slugs and respective product ids")
-    public ResponseEntity<List<ProductSlugDto>> getProductSlugs(){
-        List<ProductSlugDto> slugs = productQuery.getSlugInfo();
-        return ResponseEntity.ok().body(slugs);
-    }
+
 
 }

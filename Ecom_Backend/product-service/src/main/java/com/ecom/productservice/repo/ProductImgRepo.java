@@ -13,5 +13,7 @@ import java.util.UUID;
 @Repository
 public interface ProductImgRepo extends JpaRepository<ProductImage, UUID>, JpaSpecificationExecutor<ProductImage> {
 
-    List<ProductImage> findByProductId(UUID productId);
+    Optional<ProductImage> findByProductId(UUID productId);
+    //List<ProductImage> findByProductId(UUID productId);
+    List<ProductImage> findAllByProductId(UUID productId);
 }

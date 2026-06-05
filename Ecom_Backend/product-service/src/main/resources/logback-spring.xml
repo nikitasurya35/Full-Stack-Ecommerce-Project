@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOG_DIR" value="logs" />
+    <property name="LOG_DIR" value="product-service/logs" />
     <property name="APP_NAME" value="product-service" />
 
     <!-- Console appender (optional, remove in prod) -->

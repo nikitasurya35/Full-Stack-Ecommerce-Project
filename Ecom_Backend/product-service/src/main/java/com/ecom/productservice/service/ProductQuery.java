@@ -166,10 +166,4 @@ public class ProductQuery {
         };
     }
 
-    public List<ProductSlugDto> getSlugInfo() {
-        return productRepo.findAll()
-                .stream()
-                .map(product -> new ProductSlugDto(product.getId(),product.getSlug()))
-                .toList();
-    }
 }
