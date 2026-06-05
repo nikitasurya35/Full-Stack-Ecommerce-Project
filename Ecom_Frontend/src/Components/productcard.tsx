@@ -1,9 +1,10 @@
 import type { Product } from "../Data/productListSpring";
 import { useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, ArrowLeft, Star, Package } from "lucide-react";
+import { Heart, Package, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 
 const ProductCard = ({ product }: { product: Product }) => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
 
   const [wishlist, setWishlist] = useState(false);
   
@@ -37,12 +38,6 @@ const ProductCard = ({ product }: { product: Product }) => {
       )}
      
       {/* Badge */}
-      {/* {product.status !== "ACTIVE" && (
-        <span className="absolute top-4 left-4 text-[11px] font-semibold bg-red-100 text-red-600 px-2.5 py-1 rounded-full">
-          Out of stock
-        </span>
-      )} */}
-
       <span className= { `absolute top-4 left-4 text-[11px] font-semibold px-2.5 py-1 rounded-full
       ${product.status === "ACTIVE" ? "bg-green-100 text-emerald-600" : "bg-red-100 text-red-600"}`}>
         {product.status === "ACTIVE" ? "In Stock" : "Out of stock"}
@@ -60,21 +55,21 @@ const ProductCard = ({ product }: { product: Product }) => {
 
 
       <div className="h-32 flex items-center justify-center">
-        📦
+       {product.productImageUrl ? (
+              <img
+                src={`${API_BASE_URL}${product.productImageUrl}`}
+                alt={product.productName}
+                className="w-full h-full object-contain p-8 rounded-2xl"
+              />
+            ) : (
+              <Package className="w-16 h-16 text-gray-300" />
+            )}
       </div>
 
       <p className="text-xs text-gray-500 uppercase">
         {product.categoryName}
       </p>
-      {/* <ProductDetails 
-        onClick={handleCardClick}
-        key={product.id}
-        product={product}
-      >
-        <h3 className="font-semibold hover:text-blue-700 hover:underline transition-all duration-200">
-          {product.productName}
-        </h3>
-      </ProductDetails> */}
+      
       <div key={product.id} onClick={() => handleCardClick(product)} className="cursor-pointer">
         <h3 className="font-semibold hover:text-blue-700 hover:underline transition-all duration-200">
           {product.productName}
@@ -88,9 +83,6 @@ const ProductCard = ({ product }: { product: Product }) => {
       <div className="flex justify-between items-center mt-2">
         <p className="font-bold">₹{product.price}</p>
 
-        {/* <button className="bg-black text-white p-2 rounded">
-          🛒
-        </button> */}
         <button className=" p-2 bg-blue-700 rounded-full border border-gray-200 hover:bg-blue-500 shadow-sm">
           <ShoppingCart className="w-3 h-3 text-white" />
         </button>

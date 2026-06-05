@@ -7,6 +7,6 @@ const API = axios.create({
 });
 
 export const getCategorieInfo = async (): Promise<CategoryInfo[]> => {
-  const response = await API.get("/categories");
+  const response = await API.get("/api/products/categories");
   return response.data;
 };

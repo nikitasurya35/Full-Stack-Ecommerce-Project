@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, ArrowLeft, Star } from "lucide-react";
+import { Heart, ShoppingCart, ArrowLeft, Star, Package } from "lucide-react";
 import type { Product } from "../Data/productListSpring";
 import { getProducts } from "../api/productApi"; // adjust path as needed
 
@@ -14,7 +14,7 @@ type Tab = "details" | "specs" | "reviews";
 const ProductDetails = () => {
   const {slug}  = useParams<{ slug: string }>(); // useParams to get the slug from the URL; useParams returns an object of key-value pairs of the dynamic params in the URL, so we destructure it to get 'slug'
   const navigate = useNavigate();
-
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const productId: string = slug?.split("__").pop() || "0"; 
   console.log("Extracted productId:", productId); // Log the extracted productId for debugging
   // Get the last part after the last hyphen [pop() gets the last element of the array; 
@@ -110,15 +110,15 @@ const ProductDetails = () => {
             </button>
 
             {/* Image or fallback */}
-            {/* {product.productImageUrl ? (
+            {product.productImageUrl ? (
               <img
-                src={product.imageUrl}
-                alt={product.name}
+                src={`${API_BASE_URL}${product.productImageUrl}`}
+                alt={product.productName}
                 className="w-full h-full object-contain p-8 rounded-2xl"
               />
             ) : (
               <Package className="w-16 h-16 text-gray-300" />
-            )} */}
+            )}
           </div>
         </div>
 
