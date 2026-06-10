@@ -1,91 +1,134 @@
 import type { Product } from "../Data/productListSpring";
 import { useNavigate } from "react-router-dom";
-import { Heart, Package, ShoppingCart } from "lucide-react";
+import { Heart, Package, ShoppingCart, Check } from "lucide-react";
 import { useState } from "react";
 
 const ProductCard = ({ product }: { product: Product }) => {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
-
   const [wishlist, setWishlist] = useState(false);
-  
+  const [added, setAdded] = useState(false);
   const navigate = useNavigate();
-  // on the card's onClick:
+ 
   const handleCardClick = (product: Product) => {
-    console.log(product);
-    const p_id: number = product.id;
-    const p_slug: string = product.productName.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
-    navigate(`/product/${p_slug}__${product.id}`); //This will be now shown in the url like: /product/iphone-15-pro-max-123
-    
+    const p_slug = product.productName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-");
+    navigate(`/product/${p_slug}__${product.id}`);
   };
-
-  const createdAt = new Date(product.createdAt);
-
-  // Example: show NEW if product is less than 7 days old
-  const isNew = Date.now() - createdAt.getTime() < 60 * 24 * 60 * 60 * 1000;
-
+ 
+  const isNew =
+    Date.now() - new Date(product.createdAt).getTime() < 60 * 24 * 60 * 60 * 1000;
+ 
+  const inStock = product.status === "ACTIVE";
+ 
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (added) return;
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1600);
+  };
+ 
   return (
-    <div className="bg-gray-100 rounded-xl p-4 relative items-center justify-center">
-      {/* {product.tag && (
-        <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
-          {product.tag}
-        </span>
-      )} */}
-      
-      {isNew && product.status === "ACTIVE" &&(
-        <span className="absolute top-4 left-20 bg-orange-500 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
-          NEW
-        </span>
-      )}
-     
-      {/* Badge */}
-      <span className= { `absolute top-4 left-4 text-[11px] font-semibold px-2.5 py-1 rounded-full
-      ${product.status === "ACTIVE" ? "bg-green-100 text-emerald-600" : "bg-red-100 text-red-600"}`}>
-        {product.status === "ACTIVE" ? "In Stock" : "Out of stock"}
-      </span>
-
-      {/* Wishlist */}
-      <button
-        onClick={() => setWishlist((w) => !w)}
-        className="absolute top-4 right-4 p-1 bg-white rounded-full shadow-sm hover:bg-gray-50 transition"
+    <div
+      className="group relative bg-white rounded-2xl border border-gray-300 overflow-hidden
+                 hover:shadow-[0_8px_32px_rgba(0,0,0,0.09)] hover:-translate-y-0.5
+                 transition-all duration-200 cursor-pointer"
+    >
+      {/* Image area */}
+      <div
+        className="relative h-40 bg-gray-50 flex items-center justify-center overflow-hidden"
+        onClick={() => handleCardClick(product)}
       >
-        <Heart
-          className={`w-3 h-3 ${wishlist ? "fill-red-500 text-red-500" : "text-gray-400"}`}
-        />
-      </button>
-
-
-      <div className="h-32 flex items-center justify-center">
-       {product.productImageUrl ? (
-              <img
-                src={`${API_BASE_URL}${product.productImageUrl}`}
-                alt={product.productName}
-                className="w-full h-full object-contain p-8 rounded-2xl"
-              />
-            ) : (
-              <Package className="w-16 h-16 text-gray-300" />
-            )}
+        {product.productImageUrl ? (
+          <img
+            src={`${API_BASE_URL}${product.productImageUrl}`}
+            alt={product.productName}
+            className="w-full h-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <Package className="w-10 h-10 text-gray-300" />
+        )}
+ 
+        {/* Stock badge */}
+        <span
+          className={`absolute top-2.5 left-2.5 text-[11px] font-semibold px-2.5 py-1 rounded-full
+            ${inStock
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-red-50 text-red-700"
+            }`}
+        >
+          {inStock ? "In Stock" : "Out of stock"}
+        </span>
+ 
+        {/* NEW badge */}
+        {isNew && inStock && (
+          <span className="absolute top-2.5 left-[88px] text-[10px] font-bold px-2 py-1 rounded-full bg-orange-500 text-white tracking-wide">
+            NEW
+          </span>
+        )}
+ 
+        {/* Wishlist */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setWishlist((w) => !w); }}
+          className="absolute top-2 right-2 w-[30px] h-[30px] bg-white/90 border border-gray-100
+                     rounded-full flex items-center justify-center
+                     hover:scale-110 transition-transform duration-150"
+          aria-label="Toggle wishlist"
+        >
+          <Heart
+            className={`w-3.5 h-3.5 transition-colors ${
+              wishlist ? "fill-red-500 text-red-500" : "text-gray-400"
+            }`}
+          />
+        </button>
       </div>
-
-      <p className="text-xs text-gray-500 uppercase">
-        {product.categoryName}
-      </p>
-      
-      <div key={product.id} onClick={() => handleCardClick(product)} className="cursor-pointer">
-        <h3 className="font-semibold hover:text-blue-700 hover:underline transition-all duration-200">
+ 
+      {/* Body */}
+      <div className="px-3.5 pt-3 pb-4">
+        <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase mb-1">
+          {product.categoryName}
+        </p>
+ 
+        <h3
+          onClick={() => handleCardClick(product)}
+          className="text-sm font-semibold text-gray-900 leading-snug mb-3
+                     truncate hover:text-blue-600 transition-colors duration-150"
+        >
           {product.productName}
         </h3>
-      </div>
-
-      {/* <p className="text-yellow-500">Stock {product.availableStock}</p> */}
-      {/* <p className="text-yellow-500"> {product.status}</p> */}
-      
-
-      <div className="flex justify-between items-center mt-2">
-        <p className="font-bold">₹{product.price}</p>
-
-        <button className=" p-2 bg-blue-700 rounded-full border border-gray-200 hover:bg-blue-500 shadow-sm">
-          <ShoppingCart className="w-3 h-3 text-white" />
-        </button>
+ 
+        <div className="flex items-center justify-between">
+          <p
+            className={`text-[17px] font-semibold tracking-tight ${
+              inStock ? "text-gray-900" : "text-gray-300"
+            }`}
+          >
+            ₹{product.price.toLocaleString("en-IN")}
+          </p>
+ 
+          <button
+            onClick={handleAddToCart}
+            disabled={!inStock}
+            className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center
+                        transition-all duration-150
+                        ${inStock
+                          ? added
+                            ? "bg-emerald-600 scale-95"
+                            : "bg-blue-700 hover:bg-blue-800 hover:scale-105"
+                          : "bg-gray-100 cursor-not-allowed"
+                        }`}
+            aria-label="Add to cart"
+          >
+            {added ? (
+              <Check className="w-3.5 h-3.5 text-white" />
+            ) : (
+              <ShoppingCart
+                className={`w-3.5 h-3.5 ${inStock ? "text-white" : "text-gray-400"}`}
+              />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
