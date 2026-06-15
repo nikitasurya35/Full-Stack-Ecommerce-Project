@@ -2,6 +2,7 @@ package com.ecom.productservice.repo;
 
 import com.ecom.productservice.dto.CategoryStockInfoDto;
 import com.ecom.productservice.dto.ProductDetailsDto;
+import com.ecom.productservice.dto.SearchSuggestionDto;
 import com.ecom.productservice.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -15,6 +16,20 @@ import java.util.UUID;
 @Repository
 public interface ProductRepo extends JpaRepository<Product, UUID> , JpaSpecificationExecutor<Product> //Used to add specification code
 {
+
+    @Query("""
+       SELECT new com.ecom.productservice.dto.SearchSuggestionDto(
+              p.id,
+              p.productName
+       )
+       FROM Product p
+       WHERE LOWER(p.productName)
+       LIKE LOWER(CONCAT('%',:keyword, '%'))
+       ORDER BY p.productName ASC
+       LIMIT 8
+       """)
+    List<SearchSuggestionDto> findSuggestions(@Param("keyword") String keyword);
+
 
     //Category Stock Information //To be shown HomePage - onLoad
     @Query("""

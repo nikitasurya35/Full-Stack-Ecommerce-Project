@@ -1,12 +1,10 @@
 package com.ecom.productservice.controller;
 
-import com.ecom.productservice.dto.CategoryStockInfoDto;
-import com.ecom.productservice.dto.HomePageDto;
-import com.ecom.productservice.dto.ProductDetailsDto;
-import com.ecom.productservice.dto.ProductSlugDto;
+import com.ecom.productservice.dto.*;
 import com.ecom.productservice.service.ProductQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,9 +30,12 @@ public class ProductDisplay {
             @RequestParam(required = false) List<UUID> categoryId,
             @RequestParam(required = false) UUID productId,
             @RequestParam(required = false) Boolean stockStatus,
-            @RequestParam(required = false) String sortBy
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok().body(productQuery.getHomeData(categoryId, productId, stockStatus, sortBy));
+        return ResponseEntity.ok().body(productQuery.getHomeData(categoryId, productId, stockStatus, sortBy, page, size, keyword));
     }
 
     @GetMapping("/categories")
@@ -49,15 +50,30 @@ public class ProductDisplay {
     //?productId=123e4567-e89b-12d3-a456-426614174000
     @GetMapping("/products")
     @Operation(summary = "List of Products")
-    public ResponseEntity<List<ProductDetailsDto>> getAllProducts(
+    public ResponseEntity<Page<ProductDetailsDto>> getAllProducts(
             @RequestParam(required = false) List<UUID> categoryId,
             @RequestParam(required = false) UUID productId,
             @RequestParam(required = false) Boolean stockStatus,
-            @RequestParam(required = false) String sortBy
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword
+
     ) {
-        return ResponseEntity.ok().body(productQuery.getProductDetails(categoryId, productId, stockStatus, sortBy));
+        return ResponseEntity.ok().body(productQuery.getProductDetails(categoryId, productId, stockStatus, sortBy, page, size, keyword));
     }
 
+    @GetMapping("/suggestions")
+    @Operation(summary = "Get list of all productnames related to the keyword typed in the search bar")
+    public ResponseEntity<List<SearchSuggestionDto>> getKeywordRelatedProductNames(@RequestParam(required = false) String keyword){
+        return ResponseEntity.ok().body(productQuery.SearchSuggestions(keyword));
+    }
+
+//    @GetMapping("/searchProducts")
+//    @Operation(summary = "Get list of all products related to the keyword typed in the search bar")
+//    public ResponseEntity<List<ProductDetailsDto>> getKeywordRelatedProduct(@RequestParam(required = false) String keyword){
+//        return ResponseEntity.ok().body(productQuery.SearchProducts(keyword));
+//    }
 
 
 }

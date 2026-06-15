@@ -1,10 +1,7 @@
 //All Read/Query business logic
 package com.ecom.productservice.service;
 
-import com.ecom.productservice.dto.CategoryStockInfoDto;
-import com.ecom.productservice.dto.HomePageDto;
-import com.ecom.productservice.dto.ProductDetailsDto;
-import com.ecom.productservice.dto.ProductSlugDto;
+import com.ecom.productservice.dto.*;
 import com.ecom.productservice.mapper.ProductMapper;
 import com.ecom.productservice.model.Product;
 import com.ecom.productservice.repo.CategoryRepo;
@@ -13,11 +10,15 @@ import com.ecom.productservice.repo.ProductRepo;
 import com.ecom.productservice.specifications.ProductSpecifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,11 +61,15 @@ public class ProductQuery {
 
 
     //Uses Spring JPA CriteriaAPI
-    public List<ProductDetailsDto> getProductDetails(
+    //Was previously List -> now made the return 'Page'
+    public Page<ProductDetailsDto> getProductDetails(
             List<UUID> categoryId,
             UUID productId,
             Boolean stockStatus,
-            String sortBy
+            String sortBy,
+            int page,
+            int size,
+            String keyword
     ) {
 
         // Build dynamic specification
@@ -83,68 +88,119 @@ public class ProductQuery {
         if (stockStatus != null){
             spec = spec.and(productSpecifications.hasStockStatus(stockStatus));
         }
+        if (keyword != null && !keyword.isEmpty()){
+            spec = spec.and(productSpecifications.hasProductNameContaining(keyword));
+        }
 
         //Sorting
-        Sort sort = buildSort(sortBy);
+        Sort sortval = buildSort(sortBy);
+
+        //Paging of Web products
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                sortval
+        );
 
         //Query
-        List<Product> products = productRepo.findAll(spec, sort);
+        //List<Product> products = productRepo.findAll(spec, sort);
+        Page<Product> products = productRepo.findAll(spec, pageable);
 
         //DTO conversion
-        List<ProductDetailsDto> dtoList = products.stream().map(p -> productMapper.toProductDetailDTO(p)).toList();
-        dtoList.forEach(p -> log.info("{}", p));
+        //List<ProductDetailsDto> dtoList = products.stream().map(p -> productMapper.toProductDetailDTO(p)).toList();
+        Page<ProductDetailsDto> dtoList = products.map(productMapper::toProductDetailDTO);
+        dtoList.forEach(p -> log.info("ProductDetails::::: {}", p));
 
         return dtoList;
+
 
     }
 
 
 
     //Consolidating for Home Page
-    public HomePageDto getHomeData(List<UUID> categoryId, UUID productId, Boolean stockStatus, String sortBy)
+    public HomePageDto getHomeData(List<UUID> categoryId, UUID productId, Boolean stockStatus, String sortBy, int page, int size, String keyword)
     {
 
         // Case 1: Product ID present
         if (productId != null){
-            List<CategoryStockInfoDto> categoryStockInfo = null;
-            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
+//            List<CategoryStockInfoDto> categoryStockInfo = null;
+            //List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
+            Page<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy, page, size, keyword );
 
             return HomePageDto.builder()
-                    .categoriesStockInfo(categoryStockInfo)
+//                    .categoriesStockInfo(categoryStockInfo)
                     .products(products)
                     .build();
         }
 
         //Case 2: Category Selected
         if(categoryId != null && !categoryId.isEmpty()) {
-            List<CategoryStockInfoDto> categoryStockInfo = CategoryStockInfo(categoryId);
-            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
+//            List<CategoryStockInfoDto> categoryStockInfo = CategoryStockInfo(categoryId);
+//            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
+            Page<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy, page, size , keyword );
 
             return HomePageDto.builder()
-                    .categoriesStockInfo(categoryStockInfo)
+//                    .categoriesStockInfo(categoryStockInfo)
                     .products(products)
                     .build();
         }
 
         //Case 3: StockStatus is selected
         if(stockStatus != null || sortBy != null){
-            List<CategoryStockInfoDto> categoryStockInfo = null;
-            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
+//            List<CategoryStockInfoDto> categoryStockInfo = null;
+//            List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
+            Page<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy, page, size , keyword );
 
             return HomePageDto.builder()
-                    .categoriesStockInfo(categoryStockInfo)
+//                    .categoriesStockInfo(categoryStockInfo)
                     .products(products)
                     .build();
         }
 
-        //Case 4: Nothing is selected
+        if(keyword != null && !keyword.isEmpty()){
+            Page<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy, page, size , keyword );
+            return HomePageDto.builder()
+                    .products(products)
+                    .build();
+        }
+
+        //Case 0: Nothing is selected
         List<CategoryStockInfoDto> categoryStockInfo = CategoryStockInfo(categoryId);
-        List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
+//        List<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy);
+        Page<ProductDetailsDto> products = getProductDetails(categoryId, productId, stockStatus, sortBy, page, size , keyword );
 
         return HomePageDto.builder()
-                .categoriesStockInfo(categoryStockInfo)
+//                .categoriesStockInfo(categoryStockInfo)
                 .products(products)
                 .build();
+    }
+
+    //To get dropdown of all related productnames from db in the search bar
+    public List<SearchSuggestionDto> SearchSuggestions(String keyword) {
+        log.info("KEYWORD: {}",keyword);
+        List<SearchSuggestionDto> suggestions = productRepo.findSuggestions(keyword);
+        suggestions.forEach(s -> log.info("PRODUCT NAMES:: {}", s));
+        return suggestions;
+    }
+
+    public List<ProductDetailsDto> SearchProducts(String keyword) {
+        log.info("KEYWORDssss: {}",keyword);
+
+        // Build dynamic specification
+        Specification<Product> spec = (root, query, cb) -> cb.conjunction();
+        spec = spec.and(productSpecifications.hasProductNameContaining(keyword));
+        log.info("SPEC: {}",spec);
+
+        //Query
+        List<Product> products = productRepo.findAll(spec);
+
+        //DTO conversion
+        List<ProductDetailsDto> dtoList = products.stream().map(p -> productMapper.toProductDetailDTO(p)).toList();
+        dtoList.forEach(p -> log.info("PRODUCTS:: {}", p));
+
+        return dtoList;
+
     }
 
 

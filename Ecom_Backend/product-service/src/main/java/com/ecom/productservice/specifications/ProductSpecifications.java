@@ -13,6 +13,8 @@ import java.util.UUID;
 
 @Component
 public class ProductSpecifications {
+    //Specification<Product> means: This specification can be applied to the Product entity.
+    //It does not mean the result is a single product. The result type is determined by the repository method you call:
 
     //Make methods static (no bean needed) - therefore no need for @component or @service required
     //Case 1: Filter by ProductId
@@ -25,6 +27,7 @@ public class ProductSpecifications {
         };
     }
 
+    //Case 2: Filter by CategoryId
     public Specification<Product> hasCategoryId(List<UUID> categoryId) {
         return (root, query, criteriaBuilder) -> {
             if (categoryId == null || categoryId.isEmpty()) {
@@ -34,6 +37,7 @@ public class ProductSpecifications {
         };
     }
 
+    //Case 3: Filter by stockstatus
     public Specification<Product> hasStockStatus(Boolean stockStatus) {
         return (root,query, criteriaBuilder ) -> {
             if(stockStatus == null){
@@ -54,6 +58,17 @@ public class ProductSpecifications {
             // If inStock = false, available stock <= 0
             return stockStatus ? criteriaBuilder.greaterThan(availableStock, 0) : criteriaBuilder.lessThanOrEqualTo(availableStock, 0);
         };
+    }
+
+    //Gets list of products that will have the productname related to the search keyword
+    public Specification<Product> hasProductNameContaining(String keyword) {
+        return (root, query, criteriaBuilder) -> {
+            if(keyword == null){
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("productName")), "%" + keyword.toLowerCase() + "%");
+        };
+
     }
 
     // For DTO projection
