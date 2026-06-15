@@ -9,6 +9,8 @@ export interface Product {
   createdAt: string;
   status: string | null; // "In Stock", "Out of Stock", or null for unknown
   productImageUrl: string;
+  page: number; // for pagination
+  size: number; // for pagination
   // rating: 4;
   // reviewCount: 128;
   // description:
@@ -28,4 +30,17 @@ export interface CategoryInfo {
   totalCount: number;
   inStockCount: number;
   outOfStockCount: number;
+}
+
+export interface ProductPageResponse<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  number: number;
+  size: number;
+}
+
+export interface HomePageResponse {
+  products: ProductPageResponse<Product>;
+  // categoriesStockInfo: CategoryInfo[];
 }

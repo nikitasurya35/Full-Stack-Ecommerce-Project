@@ -33,8 +33,8 @@ const ProductDetails = () => {
 
     setLoading(true);
 
-    getProducts({ productId })
-      .then((products) => setProduct(products[0] || null))
+    getProducts.getListOfProducts({ productId })
+      .then((products) => setProduct(products.products.content[0] || null))
       .catch((err) => console.error("Failed to fetch product:", err))
       .finally(() => setLoading(false));
 
@@ -136,7 +136,7 @@ const ProductDetails = () => {
           </div>
 
           {/* Rating */}
-          {product.rating != null && (
+          {/* {product.rating != null && (
             <div className="flex items-center gap-1.5">
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((s) => (
@@ -154,7 +154,7 @@ const ProductDetails = () => {
                 <span className="text-xs text-gray-400">{product.reviewCount} reviews</span>
               )}
             </div>
-          )}
+          )} */}
 
           {/* Price */}
           <div className="flex items-baseline gap-3">
@@ -174,9 +174,9 @@ const ProductDetails = () => {
           </div>
 
           {/* Description */}
-          {product.description && (
+          {/* {product.description && (
             <p className="text-sm text-gray-500 leading-relaxed">{product.description}</p>
-          )}
+          )} */}
 
           {/* Quantity */}
           <div className="flex items-center gap-3">
@@ -272,7 +272,7 @@ const ProductDetails = () => {
           ))}
         </div>
 
-        {activeTab === "details" && (
+        {/* {activeTab === "details" && (
           <ul className="space-y-2.5">
             {(product.highlights ?? []).map((h: string) => (
               <li key={h} className="flex items-center gap-2.5 text-sm text-slate-700">
@@ -304,7 +304,7 @@ const ProductDetails = () => {
               )}
             </tbody>
           </table>
-        )}
+        )} */}
 
         {/* {activeTab === "reviews" && (
           <div className="space-y-4">
