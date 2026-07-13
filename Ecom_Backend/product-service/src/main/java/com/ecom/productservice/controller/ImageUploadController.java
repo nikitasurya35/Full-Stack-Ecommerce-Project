@@ -1,7 +1,6 @@
 package com.ecom.productservice.controller;
 
 import com.ecom.productservice.dto.ImageResponseDto;
-import com.ecom.productservice.dto.ProductDetailsDto;
 import com.ecom.productservice.dto.ProductSlugDto;
 import com.ecom.productservice.service.ImageUploadService;
 import io.swagger.v3.oas.annotations.Operation;

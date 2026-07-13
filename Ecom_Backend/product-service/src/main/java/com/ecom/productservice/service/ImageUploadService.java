@@ -2,10 +2,11 @@ package com.ecom.productservice.service;
 
 import com.ecom.productservice.dto.ImageResponseDto;
 import com.ecom.productservice.dto.ProductSlugDto;
+import com.ecom.productservice.exceptions.FileStorageException;
+import com.ecom.productservice.exceptions.ResourceNotFoundException;
 import com.ecom.productservice.mapper.ProductImageMapper;
 import com.ecom.productservice.model.Product;
 import com.ecom.productservice.model.ProductImage;
-import com.ecom.productservice.repo.CategoryRepo;
 import com.ecom.productservice.repo.ProductImgRepo;
 import com.ecom.productservice.repo.ProductRepo;
 import jakarta.transaction.Transactional;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.ecom.productservice.repo.ProductRepo;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,15 +46,14 @@ public class ImageUploadService {
     @Transactional
     public void imageUpload(UUID productId,MultipartFile file)
     {
-        Product product = productRepo.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+        Product product = productRepo.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product", productId));
         String fileName = UUID.randomUUID() + "_" + product.getSlug();
         Path filePath = Paths.get(uploadDir).toAbsolutePath();
 
         try{
             Files.createDirectories(filePath);
         }catch (Exception ex){
-            System.out.println("Folder already exists");
-            ex.printStackTrace();
+            throw new FileStorageException("Failed to create upload directory", ex);
         }
 
         Path targetFilePath = filePath.resolve(fileName); //To create filepath with the uploaded image name
@@ -62,8 +61,7 @@ public class ImageUploadService {
         try {
             file.transferTo(targetFilePath); //This is the actual upload of File
         }catch (Exception ex){
-            System.out.println("File upload failed");
-            ex.printStackTrace();
+            throw new FileStorageException("Failed to upload file", ex);
         }
 
         String imageUrl = "/images/" + fileName;
@@ -77,8 +75,7 @@ public class ImageUploadService {
                 Files.deleteIfExists(Paths.get(productImage.getFilePath()));
                 log.info("Product image delete successfull:{} ", productImage.getProductId());
             }catch (Exception ex){
-                log.info("Product image delete failed for Pid:{} ", productImage.getProductId());
-                ex.printStackTrace();
+                throw new FileStorageException("Failed to delete file", ex);
             }
 
             productImage.setImageUrl(imageUrl);
@@ -110,8 +107,8 @@ public class ImageUploadService {
     @Transactional
     public void deleteImage(UUID productId) {
 
-        ProductImage img = productImgRepo.findByProductId(productId).orElseThrow(() -> new RuntimeException("Product Image not found"));
-        Product product = productRepo.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+        ProductImage img = productImgRepo.findByProductId(productId).orElseThrow(() -> new ResourceNotFoundException("Image", productId));
+        Product product = productRepo.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product", productId));
 
         productImgRepo.delete(img);
 

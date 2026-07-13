@@ -4,9 +4,6 @@ import com.ecom.productservice.dto.ImageResponseDto;
 import com.ecom.productservice.model.ProductImage;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 @Component
 public class ProductImageMapper {
     //Since we are getting list of images, cannot use builder as it will be only for one image or will have to map it so that it can run for per image in a loop. Therefore mapper would be a better choice

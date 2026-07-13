@@ -1,4 +1,4 @@
-package com.ecom.productservice.config;
+package com.ecom.dashboardservice.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
