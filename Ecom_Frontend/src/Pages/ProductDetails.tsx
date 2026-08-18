@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, ArrowLeft, Star, Package } from "lucide-react";
+import { Heart, ShoppingCart, ArrowLeft, Package } from "lucide-react";
 import type { Product } from "../Data/productListSpring";
 import { getProducts } from "../api/productApi"; // adjust path as needed
 

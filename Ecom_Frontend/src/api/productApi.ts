@@ -19,6 +19,7 @@ export const getProducts = {
   size?: number;
   keyword?: string;
   }): Promise<HomePageResponse> => {
+  console.log("API URL:", import.meta.env.VITE_API_URL);
   const response = await API.get("/api/products/homeapp", { params });
   console.log("API params:", params); // Log the API params for debugging
   console.log("Products Data:", response.data); // Log the entire response data for debugging

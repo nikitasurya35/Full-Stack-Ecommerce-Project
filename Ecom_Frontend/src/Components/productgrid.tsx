@@ -48,7 +48,7 @@ const ProductGrid = () => {
   const page = parseInt(searchParams.get("page") || "0");
   const size = 12;
   const keyword    = searchParams.get("keyword") ?? undefined; //Search functionality: get the keyword from URL params to fetch products based on search. This is needed because when you click on a search suggestion, it updates the URL with the keyword, and we want to react to that change by fetching the relevant products.
-
+  
 
 
   useEffect(() => {
