@@ -24,7 +24,6 @@
 	</developers>
 	<modules>
 		<module>product-service</module>
-		<module>dashboard-service</module>
 	</modules>
 	<scm>
 		<connection/>

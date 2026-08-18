@@ -7,6 +7,7 @@ logs/
 *.properties
 *.xlsx
 *.zip
+product-service/src/main/resources/application.properties
 ### STS ###
 .apt_generated
 .classpath

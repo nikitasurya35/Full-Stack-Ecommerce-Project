@@ -7,6 +7,9 @@ logs/
 *.properties
 *.xlsx
 *.zip
+product-service/src/main/resources/application.properties
+.env
+*.env
 
 ### STS ###
 .apt_generated
