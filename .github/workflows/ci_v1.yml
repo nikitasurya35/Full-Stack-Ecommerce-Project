@@ -44,4 +44,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: product service jar
-        path: ./product-service/target/product-service.jar
+        path: ./product-service/product-service.jar
