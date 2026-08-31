@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Set up JDK 21
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: '21'
         distribution: 'temurin'
@@ -43,5 +43,5 @@ jobs:
     - name: Upload the Jar file
       uses: actions/upload-artifact@v4
       with:
-        name: ecom_backend
-        path: product-service/target/*.jar
+        name: product service jar
+        path: ./product-service/target/product-service.jar
