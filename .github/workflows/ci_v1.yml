@@ -36,6 +36,10 @@ jobs:
     - name: Build with Maven
       run: mvn -B -pl product-service -am clean package -DskipTests
 
+    - name: List build files
+      run: |
+        find . -type f -name "*.jar"
+
     - name: Upload the Jar file
       uses: actions/upload-artifact@v4
       with:
