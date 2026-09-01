@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.category
     REFERENCES public.category (id) MATCH SIMPLE
                             ON UPDATE NO ACTION
                             ON DELETE NO ACTION
-    )
+    );
 
 CREATE TABLE IF NOT EXISTS public.product
 (
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS public.product
     REFERENCES public.category (id) MATCH SIMPLE
                             ON UPDATE NO ACTION
                             ON DELETE NO ACTION
-    )
+    );
 
 CREATE TABLE IF NOT EXISTS public.inventory
 (
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS public.inventory
     REFERENCES public.product (id) MATCH SIMPLE
                               ON UPDATE NO ACTION
                               ON DELETE NO ACTION
-    )
+    );
 
 
 
