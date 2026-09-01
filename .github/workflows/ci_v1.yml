@@ -94,4 +94,31 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
+  frontend:
+    name: Frontend (build, test, image)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Ecom_Frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+ 
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: Ecom_Frontend/package-lock.json
+ 
+      - name: Install dependencies
+        run: npm ci
+ 
+      - name: Lint (test stage)
+        run: npm run lint
+ 
+      - name: Build
+        run: npm run build
+
     
