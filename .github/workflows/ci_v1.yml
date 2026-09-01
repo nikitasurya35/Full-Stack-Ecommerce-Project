@@ -14,6 +14,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
   backend:
     name: Backend Java (build, test, image)
@@ -22,6 +25,21 @@ jobs:
       run:
         working-directory: Ecom_Backend
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ecom
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: Test_password_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -32,6 +50,15 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+
+    - name: Tests
+      env: 
+        SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ecom
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: Test_password_ci
+        CORS_ALLOWED_ORIGINS: http://localhost:5173
+        FILE_UPLOAD_DIR: /tmp/uploads
+      run: mvn -B -pl product-service -am test
         
     - name: Build with Maven
       run: mvn -B -pl product-service -am clean package -DskipTests
@@ -40,8 +67,4 @@ jobs:
       run: |
         find . -type f -name "*.jar"
 
-    - name: Upload the Jar file
-      uses: actions/upload-artifact@v4
-      with:
-        name: product service jar
-        path: ./product-service/product-service.jar
+    
