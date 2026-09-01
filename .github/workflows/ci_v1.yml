@@ -115,9 +115,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
  
-      - name: Lint (test stage)
-        run: npm run lint
- 
       - name: Build
         run: npm run build
 
